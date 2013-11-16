@@ -15,6 +15,8 @@ sub init {
 
 sub play_trick {
     my ($self, $msg) = @_;
+
+    print Dumper($msg);
 }
 
 1;
