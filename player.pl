@@ -80,27 +80,17 @@ sub handle_message {
         }
 
         if ($msg->{request} eq 'request_card') {
-            my $size = scalar @{$msg->{state}{hand}};
-            my $card_to_play = $msg->{state}{hand}[ int(rand($size)) ];
-
-            $card_to_play = $engine->play_trick($msg);
-
             return {
                 request_id => $msg->{request_id},
                 type       => "move",
-                response   => {
-                    type => "play_card",
-                    card => $card_to_play,
-                },
+                response   => $engine->play_trick($msg),
             };
         }
         elsif ($msg->{request} eq 'challenge_offered') {
             return {
                 request_id => $msg->{request_id},
                 type       => "move",
-                response   => {
-                    type => "reject_challenge",
-                },
+                response   => $engine->accept_challenge($msg),
             };
         }
     }
