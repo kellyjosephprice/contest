@@ -97,8 +97,18 @@ sub high_cards {
 
 sub need_to_win {
     my ( $self, $msg ) = @_;
-    my $need_to_win = 3 - $msg->{state}->{your_tricks};
+    my $need_to_win = $self->points_to_win($msg) - $msg->{state}->{your_tricks};
     return $need_to_win;
+}
+
+sub points_to_win {
+    my ($self, $msg) = @_;
+    my $points = 3;
+    my $tied = $msg->{state}->{total_tricks} - $msg->{state}->{your_tricks} - $msg->{state}->{their_tricks};
+
+    $points -= int($tied / 2);
+
+    return $points;
 }
 
 sub mean {
