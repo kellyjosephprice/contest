@@ -11,6 +11,9 @@ use Getopt::Long qw(:config bundling);
 use IO::Socket::INET;
 use JSON;
 use Pod::Usage;
+use Log::Log4perl;
+
+use Contest qw{ info warn debug trace error fatal };
 
 our %opts;
 our $RECONNECT_DELAY = 15; # seconds
@@ -31,11 +34,6 @@ run($opts{host}, $opts{port});
 exit;
 
 ##
-
-sub debug {
-    return if ! $opts{verbose};
-    print @_, "\n";
-}
 
 sub run {
     my ($host, $port) = @_;
@@ -78,6 +76,7 @@ sub handle_message {
         if ($msg->{request} eq 'request_card') {
             my $size = scalar @{$msg->{state}{hand}};
             my $card_to_play = $msg->{state}{hand}[ int(rand($size)) ];
+
             return {
                 request_id => $msg->{request_id},
                 type       => "move",
