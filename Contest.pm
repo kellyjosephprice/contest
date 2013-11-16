@@ -52,6 +52,7 @@ sub accept_challenge {
         return { type => 'accept_challenge', };
     }
     else {
+        print "Denied!\n";
         return { type => 'reject_challenge', };
     }
 }
@@ -120,6 +121,22 @@ sub mean {
     $mean = int( $sum / scalar( @{ $msg->{state}->{hand} } ) );
 
     return $mean;
+}
+
+sub parse_result {
+    my($self, $msg) = @_;
+
+    if($msg->{result}->{type} eq 'trick_won') {
+        
+    } elsif($msg->{result}->{type} eq 'hand_done') {
+
+    } elsif($msg->{result}->{type} eq 'game_won') {
+        if($msg->{result}->{by} == $msg->{your_player_num} ) {
+            print "We are the champions!\n";
+        }
+    } elsif($msg->{result}->{type} eq 'trick_tied') {
+
+    }
 }
 
 1;

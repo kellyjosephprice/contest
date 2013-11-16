@@ -89,10 +89,8 @@ sub handle_message {
         }
     }
 
-    # ...
     elsif ( $msg->{type} eq 'result' ) {
-
-        # ...
+        $engine->parse_result($msg);
     }
     elsif ( $msg->{type} eq 'error' ) {
         debug "Error: $msg->{message}";
