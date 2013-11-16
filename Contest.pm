@@ -13,7 +13,7 @@ sub new {
 
 sub init {
     my ( $self, $opts ) = @_;
-    $self->{avg_threshold} = 8;
+    $self->{avg_threshold} = 7;
     $self->{all_threshold} = 10;
 }
 
