@@ -13,7 +13,8 @@ sub new {
 
 sub init {
     my ( $self, $opts ) = @_;
-    $self->{threshold} = 9;
+    $self->{avg_threshold} = 9;
+    $self->{all_threshold} = 10;
 }
 
 sub play_trick {
@@ -74,20 +75,38 @@ sub get_mid_card {
 
 sub challenge {
     my ( $self, $msg ) = @_;
+
+    if ( $self->mean($msg) > $self->{avg_threshold} ) {
+        return 1;
+    } elsif ( $self->high_cards($msg) ) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+sub high_cards {
+    my($self, $msg) = @_;
+    my @higher_than = grep { $self->{all_threshold} } @{ $msg->{state}->{hand} };
+    my $need_to_win = 3 - $msg->{state}->{your_points};
+     
+    if(scalar(@higher_than) > $need_to_win) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+sub mean {
+    my( $self, $msg) = @_;
     my $sum  = 0;
     my $mean = 1;
 
     $sum += $_ for @{ $msg->{state}->{hand} };
     $mean = int( $sum / scalar( @{ $msg->{state}->{hand} } ) );
 
-    if ( $mean > $self->{threshold} ) {
-
-        # challenge accepted!!
-        return 1;
-    }
-    else {
-        return 0;
-    }
+    return $mean;
 }
 
 1;
