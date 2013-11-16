@@ -13,13 +13,12 @@ sub new {
 
 sub init {
     my ( $self, $opts ) = @_;
+    $self->{threshold} = 9;
 }
 
 sub play_trick {
     my ( $self, $msg ) = @_;
     my $response = {};
-
-    print Dumper($msg);
 
     if ( $msg->{state}->{can_challenge} && $self->challenge($msg) ) {
         return { type => 'offer_challenge', };
@@ -81,7 +80,7 @@ sub challenge {
     $sum += $_ for @{ $msg->{state}->{hand} };
     $mean = int( $sum / scalar( @{ $msg->{state}->{hand} } ) );
 
-    if ( $mean > 10 ) {
+    if ( $mean > $self->{threshold} ) {
 
         # challenge accepted!!
         return 1;
