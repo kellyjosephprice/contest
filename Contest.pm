@@ -71,7 +71,7 @@ sub get_next_highest {
 sub get_mid_card {
     my ( $self, $hand ) = @_;
 
-    return ( $hand->[ int( scalar(@$hand) / 2 ) ] );
+    return ( $hand->[ int( ( scalar(@$hand) - 1 ) / 2 ) ] );
 }
 
 sub challenge {
@@ -81,7 +81,7 @@ sub challenge {
         print "Challenge! (average)\n";
         return 1;
     }
-    elsif ( $self->high_cards($msg) > $self->need_to_win($msg) ) {
+    elsif ( $self->high_cards($msg) >= $self->need_to_win($msg) ) {
         print "Challenge! (high cards)\n";
         return 1;
     }
