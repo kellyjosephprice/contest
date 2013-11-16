@@ -75,7 +75,7 @@ sub get_next_highest {
 sub get_mid_card {
     my ( $self, $hand ) = @_;
 
-    return ( $hand->[ int( ( scalar(@$hand) - 1 ) / 2 ) ] );
+    return ( sort {$a <=> $b} @$hand)[ int( ( scalar(@$hand) - 1 ) / 2 ) ];
 }
 
 sub challenge {
