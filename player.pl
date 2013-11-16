@@ -11,9 +11,10 @@ use Getopt::Long qw(:config bundling);
 use IO::Socket::INET;
 use JSON;
 use Pod::Usage;
-use Log::Log4perl;
 
-use Contest qw{ info warn debug trace error fatal };
+use Contest;
+
+sub debug(@);
 
 our %opts;
 our $RECONNECT_DELAY = 15; # seconds
@@ -37,6 +38,8 @@ exit;
 
 sub run {
     my ($host, $port) = @_;
+    my $engine = Contest->new();
+    $engine->init();
 
     while (1) {
         eval {
@@ -49,7 +52,7 @@ sub run {
             while (1) {
                 my $msg = get_message($s);
 
-                my $response = handle_message($msg);
+                my $response = handle_message($msg, $engine);
                 if ($response) {
                     send_message($s, $response);
                 }
@@ -64,7 +67,7 @@ sub run {
 }
 
 sub handle_message {
-    my ($msg) = @_;
+    my ($msg, $engine) = @_;
 
     # Move request
     if ($msg->{type} eq 'request') {
@@ -76,6 +79,8 @@ sub handle_message {
         if ($msg->{request} eq 'request_card') {
             my $size = scalar @{$msg->{state}{hand}};
             my $card_to_play = $msg->{state}{hand}[ int(rand($size)) ];
+
+            $card_to_play = $engine->play_trick($msg);
 
             return {
                 request_id => $msg->{request_id},
@@ -150,6 +155,12 @@ sub get_message {
     }
 
     return decode_json($json);
+}
+
+sub debug(@) {
+    if($opts{verbose}) {
+        print $_."\n" for @_;
+    }
 }
 
 __END__
