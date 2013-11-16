@@ -21,7 +21,10 @@ sub play_trick {
     my ( $self, $msg ) = @_;
     my $response = {};
 
-    if ( $msg->{state}->{can_challenge} && $self->challenge($msg) ) {
+    if (   $msg->{state}->{can_challenge}
+        && ( $msg->{state}->{your_points} > $msg->{state}->{their_points} )
+        && $self->challenge($msg) )
+    {
         return { type => 'offer_challenge', };
     }
 
