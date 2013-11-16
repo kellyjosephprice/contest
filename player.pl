@@ -14,7 +14,10 @@ use Pod::Usage;
 
 use Contest;
 
+use constant { LOG => "./contest.log" };
+
 sub debug(@);
+sub log($);
 
 our %opts;
 our $RECONNECT_DELAY = 15; # seconds
@@ -161,6 +164,14 @@ sub debug(@) {
     if($opts{verbose}) {
         print $_."\n" for @_;
     }
+}
+
+sub log($) {
+    my $msg = shift;
+
+    open( my $log, ">>", LOG );
+    print $log scalar( localtime(time) ) . " - " . $msg . "\n";
+    close $log;
 }
 
 __END__
