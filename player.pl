@@ -5,6 +5,7 @@
 use strict;
 use warnings;
 
+use lib 'lib';
 use Data::Dumper;
 use Getopt::Long qw(:config bundling);
 use IO::Socket::INET;
