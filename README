@@ -1,0 +1,6 @@
+You'll want to update the handle_message subroutine to implement your game
+strategy.
+
+To run:
+
+$ perl player.pl [ -v ] -t <host> -p <port>
