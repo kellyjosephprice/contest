@@ -13,7 +13,7 @@ sub new {
 
 sub init {
     my ( $self, $opts ) = @_;
-    $self->{avg_threshold} = 10;
+    $self->{avg_threshold} = 8;
     $self->{all_threshold} = 10;
 }
 
@@ -78,8 +78,11 @@ sub get_mid_card {
 sub challenge {
     my ( $self, $msg ) = @_;
 
-    if ( $self->mean($msg) > $self->{avg_threshold} ) {
+    if ( $self->mean($msg) >
+        ( $self->{avg_threshold} + $msg->{state}->{total_tricks} ) )
+    {
         print "Challenge! (average)\n";
+
         return 1;
     }
     elsif ( $self->high_cards($msg) >= $self->need_to_win($msg) ) {
@@ -103,11 +106,14 @@ sub need_to_win {
 }
 
 sub points_to_win {
-    my ($self, $msg) = @_;
+    my ( $self, $msg ) = @_;
     my $points = 3;
-    my $tied = $msg->{state}->{total_tricks} - $msg->{state}->{your_tricks} - $msg->{state}->{their_tricks};
+    my $tied =
+      $msg->{state}->{total_tricks} -
+      $msg->{state}->{your_tricks} -
+      $msg->{state}->{their_tricks};
 
-    $points -= int($tied / 2);
+    $points -= int( $tied / 2 );
 
     return $points;
 }
@@ -124,17 +130,20 @@ sub mean {
 }
 
 sub parse_result {
-    my($self, $msg) = @_;
+    my ( $self, $msg ) = @_;
 
-    if($msg->{result}->{type} eq 'trick_won') {
-        
-    } elsif($msg->{result}->{type} eq 'hand_done') {
+    if ( $msg->{result}->{type} eq 'trick_won' ) {
 
-    } elsif($msg->{result}->{type} eq 'game_won') {
-        if($msg->{result}->{by} == $msg->{your_player_num} ) {
+    }
+    elsif ( $msg->{result}->{type} eq 'hand_done' ) {
+
+    }
+    elsif ( $msg->{result}->{type} eq 'game_won' ) {
+        if ( $msg->{result}->{by} == $msg->{your_player_num} ) {
             print "We are the champions!\n";
         }
-    } elsif($msg->{result}->{type} eq 'trick_tied') {
+    }
+    elsif ( $msg->{result}->{type} eq 'trick_tied' ) {
 
     }
 }
