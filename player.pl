@@ -20,27 +20,22 @@ sub debug(@);
 sub log($);
 
 our %opts;
-our $RECONNECT_DELAY = 15; # seconds
-our $GAME_ID = -1;
+our $RECONNECT_DELAY = 15;    # seconds
+our $GAME_ID         = -1;
 
-GetOptions(\%opts,
-    'host|t=s',
-    'port|p=i',
-    'help|h',
-    'verbose|v',
-)
-    or pod2usage(1);
+GetOptions( \%opts, 'host|t=s', 'port|p=i', 'help|h', 'verbose|v', )
+  or pod2usage(1);
 
 pod2usage(1) if $opts{help};
-pod2usage("--host and --port are required") if ! ($opts{host} and $opts{port});
+pod2usage("--host and --port are required") if !( $opts{host} and $opts{port} );
 
-run($opts{host}, $opts{port});
+run( $opts{host}, $opts{port} );
 exit;
 
 ##
 
 sub run {
-    my ($host, $port) = @_;
+    my ( $host, $port ) = @_;
     my $engine = Contest->new();
     $engine->init();
 
@@ -49,15 +44,14 @@ sub run {
             my $s = IO::Socket::INET->new(
                 PeerAddr => $host,
                 PeerPort => $port,
-            )
-                or die "Can't connect to [$host:$port]: $@";
+            ) or die "Can't connect to [$host:$port]: $@";
 
             while (1) {
                 my $msg = get_message($s);
 
-                my $response = handle_message($msg, $engine);
+                my $response = handle_message( $msg, $engine );
                 if ($response) {
-                    send_message($s, $response);
+                    send_message( $s, $response );
                 }
             }
         };
@@ -70,23 +64,23 @@ sub run {
 }
 
 sub handle_message {
-    my ($msg, $engine) = @_;
+    my ( $msg, $engine ) = @_;
 
     # Move request
-    if ($msg->{type} eq 'request') {
-        if ($GAME_ID != $msg->{state}{game_id}) {
+    if ( $msg->{type} eq 'request' ) {
+        if ( $GAME_ID != $msg->{state}{game_id} ) {
             $GAME_ID = $msg->{state}{game_id};
             debug "new game $GAME_ID";
         }
 
-        if ($msg->{request} eq 'request_card') {
+        if ( $msg->{request} eq 'request_card' ) {
             return {
                 request_id => $msg->{request_id},
                 type       => "move",
                 response   => $engine->play_trick($msg),
             };
         }
-        elsif ($msg->{request} eq 'challenge_offered') {
+        elsif ( $msg->{request} eq 'challenge_offered' ) {
             return {
                 request_id => $msg->{request_id},
                 type       => "move",
@@ -94,14 +88,17 @@ sub handle_message {
             };
         }
     }
+
     # ...
-    elsif ($msg->{type} eq 'result') {
+    elsif ( $msg->{type} eq 'result' ) {
+
         # ...
     }
-    elsif ($msg->{type} eq 'error') {
+    elsif ( $msg->{type} eq 'error' ) {
         debug "Error: $msg->{message}";
+
         # need to register IP address
-        if ($msg->{seen_host}) {
+        if ( $msg->{seen_host} ) {
             exit 1;
         }
     }
@@ -109,18 +106,18 @@ sub handle_message {
 }
 
 sub send_message {
-    my ($s, $msg) = @_;
+    my ( $s, $msg ) = @_;
 
-    my $json = encode_json($msg);
+    my $json    = encode_json($msg);
     my $to_send = length($json);
-    $s->send(pack("N", $to_send));
+    $s->send( pack( "N", $to_send ) );
 
-    while ($to_send > 0) {
+    while ( $to_send > 0 ) {
         my $writelen = $s->send($json)
-            or die "Error sending message: $!";
+          or die "Error sending message: $!";
 
         $to_send -= $writelen;
-        $json = substr($json, 0, $writelen);
+        $json = substr( $json, 0, $writelen );
     }
 }
 
@@ -128,20 +125,21 @@ sub get_message {
     my ($s) = @_;
 
     my $buf;
-    my $rv = $s->recv($buf, 4);
-    if (not defined($rv) or length($buf) < 4) {
-        die "Error receiving size: " . ($!||"(eof)");
+    my $rv = $s->recv( $buf, 4 );
+    if ( not defined($rv) or length($buf) < 4 ) {
+        die "Error receiving size: " . ( $! || "(eof)" );
     }
 
-    my $len = unpack("N", $buf);
+    my $len = unpack( "N", $buf );
 
     my $to_read = $len;
-    my $json = "";
+    my $json    = "";
 
-    while ($to_read > 0) {
+    while ( $to_read > 0 ) {
         my $buf;
-        defined($s->recv($buf, $to_read))
-            or die "Error receiving message: $! Still [$to_read] bytes left to read";
+        defined( $s->recv( $buf, $to_read ) )
+          or die
+          "Error receiving message: $! Still [$to_read] bytes left to read";
 
         $to_read -= length($buf);
         $json .= $buf;
@@ -151,8 +149,8 @@ sub get_message {
 }
 
 sub debug(@) {
-    if($opts{verbose}) {
-        print $_."\n" for @_;
+    if ( $opts{verbose} ) {
+        print $_. "\n" for @_;
     }
 }
 
