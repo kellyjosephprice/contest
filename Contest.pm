@@ -13,7 +13,7 @@ sub new {
 
 sub init {
     my ( $self, $opts ) = @_;
-    $self->{avg_threshold} = 9;
+    $self->{avg_threshold} = 10;
     $self->{all_threshold} = 10;
 }
 
@@ -48,6 +48,7 @@ sub accept_challenge {
     my ( $self, $msg ) = @_;
 
     if ( $self->challenge($msg) ) {
+        print "Challenge Accepted!\n";
         return { type => 'accept_challenge', };
     }
     else {
@@ -77,8 +78,11 @@ sub challenge {
     my ( $self, $msg ) = @_;
 
     if ( $self->mean($msg) > $self->{avg_threshold} ) {
+        print "Challenge! (average)\n";
         return 1;
-    } elsif ( $self->high_cards($msg) ) {
+    }
+    elsif ( $self->high_cards($msg) > $self->need_to_win($msg) ) {
+        print "Challenge! (high cards)\n";
         return 1;
     }
     else {
@@ -87,19 +91,18 @@ sub challenge {
 }
 
 sub high_cards {
-    my($self, $msg) = @_;
-    my @higher_than = grep { $self->{all_threshold} } @{ $msg->{state}->{hand} };
-    my $need_to_win = 3 - $msg->{state}->{your_points};
-     
-    if(scalar(@higher_than) > $need_to_win) {
-        return 1;
-    } else {
-        return 0;
-    }
+    my ( $self, $msg ) = @_;
+    return grep { $_ > $self->{all_threshold} } @{ $msg->{state}->{hand} };
+}
+
+sub need_to_win {
+    my ( $self, $msg ) = @_;
+    my $need_to_win = 3 - $msg->{state}->{your_tricks};
+    return $need_to_win;
 }
 
 sub mean {
-    my( $self, $msg) = @_;
+    my ( $self, $msg ) = @_;
     my $sum  = 0;
     my $mean = 1;
 
